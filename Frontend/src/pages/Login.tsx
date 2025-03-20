@@ -70,9 +70,9 @@ export default function LoginPage() {
         {/* Subtle grid pattern overlay */}
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNGgyLTJoLTJ6TTM1IDM2di0yMmgtMXYyMmgxeiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvZz48L3N2Zz4=')] opacity-30"></div>
         
-        {/* Subtle radial gradient overlay */}
+      
 
-        
+
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50"></div>
       </div>
 
