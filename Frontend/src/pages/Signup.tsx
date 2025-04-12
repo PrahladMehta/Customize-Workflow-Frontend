@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CalendarIcon, User, Mail, Phone, ChevronRight, ChevronLeft, UserCheck, Lock, Users, Check, X } from "lucide-react";
+import { CalendarIcon, User, Mail, Phone, ChevronRight, ChevronLeft, UserCheck, Lock, Users, Check, X} from "lucide-react";
 import DatePicker from "react-datepicker";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";
 import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
 
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -19,7 +27,7 @@ export default function SignupPage() {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+
     otp: "",
     password: "",
     confirmPassword: "",
@@ -36,6 +44,10 @@ export default function SignupPage() {
     hasNumber: false,
     hasSpecialChar: false
   });
+
+  useEffect(() => {
+     console.log(formData);
+  },[formData.dob]);
 
   useEffect(() => {
     if (formData.password) {
@@ -98,6 +110,7 @@ export default function SignupPage() {
   };
 
   const handleDateChange = (date: Date | null) => {
+    console.log("DATE",date);
     setFormData((prev) => ({ ...prev, dob: date || undefined }));
     
     if (errors.dob) {
@@ -139,13 +152,6 @@ export default function SignupPage() {
         isValid = false;
       } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
         newErrors.email = "Invalid email format.";
-        isValid = false;
-      }
-      if (!formData.phone.trim()) {
-        newErrors.phone = "Phone number is required.";
-        isValid = false;
-      } else if (!/^\d+$/.test(formData.phone)) {
-        newErrors.phone = "Phone number must contain only digits.";
         isValid = false;
       }
     }
@@ -277,7 +283,7 @@ export default function SignupPage() {
             </div>
             <CardDescription className="text-sm text-gray-400">
               {step === 1 && "Enter your personal details to get started"}
-              {step === 2 && "Enter the 6-digit code sent to your phone"}
+              {step === 2 && "Enter the 6-digit code sent to your email"}
               {step === 3 && "Create a secure password for your account"}
               {step === 4 && "Complete your profile to personalize your experience"}
             </CardDescription>
@@ -349,28 +355,7 @@ export default function SignupPage() {
                     {errors.email && (
                       <p className="text-red-400 text-xs mt-1">{errors.email}</p>
                     )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-1.5 text-gray-300">
-                      <Phone className="h-3.5 w-3.5 text-cyan-400" />
-                      <span>Phone Number</span>
-                    </Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className={cn(
-                        "transition-all duration-200 focus:ring-2 ring-offset-2 ring-offset-black/80 bg-gray-900/50 border-gray-700 text-white",
-                        errors.phone ? "ring-red-500/50" : "focus:ring-cyan-500/50"
-                      )}
-                      placeholder="1234567890"
-                    />
-                    {errors.phone && (
-                      <p className="text-red-400 text-xs mt-1">{errors.phone}</p>
-                    )}
-                  </div>
+                  </div>           
                 </>
               )}
 
@@ -378,11 +363,11 @@ export default function SignupPage() {
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center text-center">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-5 ring-1 ring-white/10">
-                      <Phone className="h-8 w-8 text-cyan-400" />
+                      <Mail className="h-8 w-8 text-cyan-400" />
                     </div>
                     <h3 className="text-lg font-medium mb-2 text-white">Verification Code</h3>
                     <p className="text-gray-400 text-sm mb-6 max-w-xs">
-                      We've sent a 6-digit verification code to your phone ending in {formData.phone.slice(-4)}
+                      We've sent a 6-digit verification code to your email {formData.email}
                     </p>
 
                     <div className="w-full max-w-xs">
@@ -541,82 +526,115 @@ export default function SignupPage() {
 
               {step === 4 && (
                 <>
-                  <div className="space-y-2">
-                    <Label htmlFor="dob" className="text-sm font-medium flex items-center gap-1.5 text-gray-300">
-                      <CalendarIcon className="h-3.5 w-3.5 text-cyan-400" />
-                      <span>Date of Birth</span>
-                    </Label>
-                    <div className="relative">
-                      <DatePicker
-                        selected={formData.dob}
-                        onChange={handleDateChange}
-                        dateFormat="MMMM d, yyyy"
-                        showYearDropdown
-                        scrollableYearDropdown
-                        yearDropdownItemNumber={100}
-                        placeholderText="Select date"
+                <div className="space-y-2">
+                  <Label htmlFor="dob" className="text-sm font-medium flex items-center gap-1.5 text-gray-300">
+                    <CalendarIcon className="h-3.5 w-3.5 text-cyan-400" />
+                    <span>Date of Birth</span>
+                  </Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
                         className={cn(
-                          "w-full rounded-md border border-gray-700 bg-gray-900/50 px-3 py-2 text-sm text-white",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/80",
-                          "placeholder:text-gray-500",
-                          "disabled:cursor-not-allowed disabled:opacity-50",
-                          errors.dob ? "ring-2 ring-red-500" : ""
+                          "w-full justify-start text-left font-normal relative pl-3 pr-10 py-2.5",
+                          "bg-gray-900/50 border-gray-700 hover:bg-gray-800/50 hover:border-gray-600",
+                          "focus-visible:ring-cyan-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black/80",
+                          "transition-all duration-200",
+                          !formData.dob && "text-gray-500",
+                          errors.dob && "ring-2 ring-red-500"
                         )}
-                        wrapperClassName="w-full"
-                      />
-                      <CalendarIcon className="absolute right-3 top-2.5 h-4 w-4 text-gray-500 pointer-events-none" />
-                    </div>
-                    {errors.dob && (
-                      <p className="text-red-400 text-xs mt-1">{errors.dob}</p>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-2 mt-4">
-                    <Label className="text-sm font-medium flex items-center gap-1.5 text-gray-300">
-                      <Users className="h-3.5 w-3.5 text-cyan-400" />
-                      <span>Gender</span>
-                    </Label>
-                    <RadioGroup 
-                      value={formData.gender} 
-                      onValueChange={handleGenderChange} 
-                      className="space-y-2.5"
+                      >
+                        <CalendarIcon className="mr-2.5 h-4 w-4 text-cyan-400/80" />
+                        {formData.dob ?<span className="text-gray-300">{format(formData.dob, "MMMM d, yyyy") }</span> : <span className="text-gray-500">Select date</span>}
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <CalendarIcon className="h-4 w-4 text-gray-500" />
+                        </div>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      className="w-auto p-0 bg-gray-800 border border-gray-700 shadow-xl shadow-black/20" 
+                      align="start"
                     >
-                      <div className={cn(
-                        "flex items-center space-x-2 rounded-md border border-gray-700 p-3 transition-all duration-200 bg-gray-900/50 hover:bg-gray-800/50",
-                        formData.gender === "male" ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border-cyan-700/50" : "",
-                        errors.gender ? "ring-2 ring-red-500" : ""
-                      )}>
-                        <RadioGroupItem value="male" id="male" className="border-gray-600 text-cyan-500" />
-                        <Label htmlFor="male" className="flex-1 cursor-pointer font-normal text-white">
-                          Male
+                      <Calendar
+                        mode="single"
+                        selected={formData.dob}
+                        onSelect={handleDateChange}
+                        disabled={(date) =>
+                          date < new Date() 
+                        }
+                        initialFocus
+                        showOutsideDays={false}
+                      
+                        className={cn(
+                          "p-3 pointer-events-auto bg-gray-800 text-gray-100",
+                          "rounded-md border-gray-700"
+                        )}
+                        classNames={{
+                          day_selected: "bg-cyan-600 text-white hover:bg-cyan-600 hover:text-white focus:bg-cyan-600 focus:text-white",
+                          day_today: "bg-gray-700 text-cyan-400",
+                          day: cn(
+                            "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-gray-700 focus:bg-gray-700",
+                            "text-gray-300 hover:text-cyan-400 focus:text-cyan-400"
+                          ),
+                          caption: "flex justify-center pt-1 relative items-center text-gray-300",
+                          caption_label: "text-sm font-medium text-gray-200",
+                          nav_button: cn(
+                            "h-7 w-7 bg-transparent p-0 opacity-70 hover:opacity-100",
+                            "border border-gray-700 text-gray-300 hover:bg-gray-700"
+                          ),
+                          head_cell: "text-gray-500 rounded-md w-9 font-normal text-[0.8rem]",
+                          cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-gray-700",
+                          table: "w-full border-collapse space-y-1",
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {errors.dob && (
+                    <p className="text-red-400 text-xs mt-1">{errors.dob}</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2 mt-4">
+                  <Label className="text-sm font-medium flex items-center gap-1.5 text-gray-300">
+                    <Users className="h-3.5 w-3.5 text-cyan-400" />
+                    <span>Gender</span>
+                  </Label>
+                  <RadioGroup 
+                    value={formData.gender} 
+                    onValueChange={handleGenderChange} 
+                    className="space-y-2.5"
+                  >
+                    {["male", "female", "other"].map((gender) => (
+                      <div 
+                        key={gender}
+                        className={cn(
+                          "flex items-center space-x-2 rounded-md border border-gray-700 p-3.5 transition-all duration-200",
+                          "bg-gray-900/50 hover:bg-gray-800/50 hover:border-gray-600",
+                          formData.gender === gender 
+                            ? "bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border-cyan-700/70 shadow-inner shadow-cyan-900/10" 
+                            : "",
+                          errors.gender ? "ring-2 ring-red-500" : ""
+                        )}
+                      >
+                        <RadioGroupItem 
+                          value={gender} 
+                          id={gender} 
+                          className="border-gray-600 text-cyan-500" 
+                        />
+                        <Label 
+                          htmlFor={gender} 
+                          className="flex-1 cursor-pointer font-normal text-white capitalize"
+                        >
+                          {gender}
                         </Label>
                       </div>
-                      <div className={cn(
-                        "flex items-center space-x-2 rounded-md border border-gray-700 p-3 transition-all duration-200 bg-gray-900/50 hover:bg-gray-800/50",
-                        formData.gender === "female" ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border-cyan-700/50" : "",
-                        errors.gender ? "ring-2 ring-red-500" : ""
-                      )}>
-                        <RadioGroupItem value="female" id="female" className="border-gray-600 text-cyan-500" />
-                        <Label htmlFor="female" className="flex-1 cursor-pointer font-normal text-white">
-                          Female
-                        </Label>
-                      </div>
-                      <div className={cn(
-                        "flex items-center space-x-2 rounded-md border border-gray-700 p-3 transition-all duration-200 bg-gray-900/50 hover:bg-gray-800/50",
-                        formData.gender === "other" ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border-cyan-700/50" : "",
-                        errors.gender ? "ring-2 ring-red-500" : ""
-                      )}>
-                        <RadioGroupItem value="other" id="other" className="border-gray-600 text-cyan-500" />
-                        <Label htmlFor="other" className="flex-1 cursor-pointer font-normal text-white">
-                          Other
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                    {errors.gender && (
-                      <p className="text-red-400 text-xs mt-1">{errors.gender}</p>
-                    )}
-                  </div>
-                </>
+                    ))}
+                  </RadioGroup>
+                  {errors.gender && (
+                    <p className="text-red-400 text-xs mt-1">{errors.gender}</p>
+                  )}
+                </div>
+              </>
               )}
             </CardContent>
 
